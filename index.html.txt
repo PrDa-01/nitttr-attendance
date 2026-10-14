@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NITTTR Bhopal - Teacher Attendance Portal</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #F5F7FA; margin: 0; padding: 0; color: #333; }
+    header { background-color: #0D3B66; color: white; padding: 20px; text-align: center; }
+    header h1 { margin: 0; font-size: 22px; }
+    header p { margin: 6px 0 0; font-size: 14px; opacity: 0.85; }
+    .container { max-width: 700px; margin: 20px auto; padding: 0 16px; }
+    .class-banner {
+      background: white; padding: 16px; border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-left: 5px solid #0D3B66;
+    }
+    .student-card {
+      background: white; padding: 14px 16px; border-radius: 10px;
+      margin-bottom: 10px; display: flex; justify-content: space-between;
+      align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .student-info h3 { margin: 0; font-size: 16px; color: #0D3B66; }
+    .student-info span { font-size: 13px; color: #666; font-weight: bold; }
+    .status-toggle {
+      display: flex; gap: 8px;
+    }
+    .btn-status {
+      padding: 8px 14px; border-radius: 6px; border: 1px solid #ccc;
+      cursor: pointer; font-weight: bold; font-size: 13px; background: #fff;
+    }
+    .btn-status.present.active { background: #2e7d32; color: white; border-color: #2e7d32; }
+    .btn-status.absent.active { background: #c62828; color: white; border-color: #c62828; }
+    .submit-btn {
+      width: 100%; background: #0D3B66; color: white; border: none;
+      padding: 16px; font-size: 16px; font-weight: bold; border-radius: 10px;
+      cursor: pointer; margin-top: 16px;
+    }
+    .submit-btn:hover { background: #164f82; }
+    #success-msg {
+      display: none; background: #e8f5e9; color: #2e7d32; padding: 16px;
+      border-radius: 10px; text-align: center; font-weight: bold; margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>NITTTR Bhopal — Web Attendance Portal</h1>
+  <p id="portal-subtitle">Classroom Verification System</p>
+</header>
+
+<div class="container">
+  <div class="class-banner">
+    <div>
+      <strong id="subject-display">Subject: Data Structures</strong><br>
+      <small id="room-display">Room: LH-1 (Block A)</small>
+    </div>
+    <div style="text-align: right;">
+      <strong id="date-display"></strong><br>
+      <small id="teacher-display">Faculty</small>
+    </div>
+  </div>
+
+  <div id="student-list"></div>
+
+  <button class="submit-btn" onclick="confirmAttendance()">Confirm & Submit Attendance</button>
+  <div id="success-msg">Attendance Confirmed & Synced Successfully!</div>
+</div>
+
+<script>
+  // 1. Read Class Details sent from the Flutter App URL
+  const params = new URLSearchParams(window.location.search);
+  const subject = params.get('subject') || 'Data Structures';
+  const room = params.get('room') || 'Lecture Hall 1 (Block A)';
+  const teacher = params.get('teacher') || 'Faculty Admin';
+
+  document.getElementById('subject-display').innerText = "Subject: " + subject;
+  document.getElementById('room-display').innerText = "Room: " + room;
+  document.getElementById('teacher-display').innerText = "By: " + teacher;
+  document.getElementById('date-display').innerText = new Date().toLocaleDateString();
+
+  // 2. Student Roster (Enrollment No. & Name)
+  const students = [
+    { enrollmentId: "260101300", name: "Aarav Sharma", status: "Present" },
+    { enrollmentId: "260101301", name: "Priya Patel", status: "Present" },
+    { enrollmentId: "260101302", name: "Rohan Verma", status: "Present" },
+    { enrollmentId: "260101303", name: "Sneha Gupta", status: "Present" },
+    { enrollmentId: "260101304", name: "Vikram Singh", status: "Present" }
+  ];
+
+  function renderStudents() {
+    const list = document.getElementById('student-list');
+    list.innerHTML = '';
+    students.forEach((student, index) => {
+      list.innerHTML += `
+        <div class="student-card">
+          <div class="student-info">
+            <span>Enrollment No: ${student.enrollmentId}</span>
+            <h3>${student.name}</h3>
+          </div>
+          <div class="status-toggle">
+            <button class="btn-status present ${student.status === 'Present' ? 'active' : ''}" 
+                    onclick="setStatus(${index}, 'Present')">Present</button>
+            <button class="btn-status absent ${student.status === 'Absent' ? 'active' : ''}" 
+                    onclick="setStatus(${index}, 'Absent')">Absent</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function setStatus(index, status) {
+    students[index].status = status;
+    renderStudents();
+  }
+
+  function confirmAttendance() {
+    const presentCount = students.filter(s => s.status === 'Present').length;
+    const msg = document.getElementById('success-msg');
+    msg.style.display = 'block';
+    msg.innerText = `Attendance Confirmed! (${presentCount}/${students.length} Present for ${subject})`;
+  }
+
+  renderStudents();
+</script>
+</body>
+</html>
